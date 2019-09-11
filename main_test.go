@@ -13,14 +13,12 @@ import (
 
 func Test_mainRouter(t *testing.T) {
 	type args struct {
-		uri       string
-		event     string
-		signature string
-		payload   string
+		uri     string
+		event   string
+		payload string
 	}
 
-	signature := "sha1=xxx-yyy-zzz"
-	serverSignature = signature
+	serverSecret = "xxx-yyy-zzz"
 
 	tests := []struct {
 		name string
@@ -29,13 +27,13 @@ func Test_mainRouter(t *testing.T) {
 	}{
 		{
 			name: "Github ping",
-			args: args{uri: "/github-webhooks", event: "ping", signature: signature,
+			args: args{uri: "/github-webhooks", event: "ping",
 				payload: `{"zen":"3232aa","hook_id":123,"hook":{}`},
 			want: `{"message":"Pong"}`,
 		},
 		{
 			name: "Github push",
-			args: args{uri: "/github-webhooks", event: "push", signature: signature,
+			args: args{uri: "/github-webhooks", event: "push",
 				payload: `{}`},
 			want: `{"message":"Done"}`,
 		},
@@ -53,7 +51,7 @@ func Test_mainRouter(t *testing.T) {
 		req, err := http.NewRequest("POST", url, strings.NewReader(args.payload))
 
 		req.Header.Add("X-GitHub-Event", args.event)
-		req.Header.Add("X-Hub-Signature", args.signature)
+		req.Header.Add("X-Hub-Signature", generateSignature([]byte(args.payload)))
 		req.Header.Add("Content-Type", "application/json")
 
 		resp, err := client.Do(req)

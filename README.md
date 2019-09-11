@@ -22,7 +22,7 @@ go build -mod=vendor -o blog-updater .
 ```shell
 export GIN_MODE=release
 export LISTENING_ADDRESS=127.0.0.1:8080
-export SERVER_SIGNATURE=sha1=xxx-yyy-zzz
+export SERVER_SECRET=xxx-yyy-zzz
 export SHELL_SCRIPT_FILE=/etc/blog-updater/do-update.sh
 blog-updater
 ```

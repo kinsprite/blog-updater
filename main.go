@@ -1,7 +1,11 @@
 package main
 
 import (
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/hex"
 	"flag"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -11,18 +15,18 @@ import (
 )
 
 var listeningAddress string
-var serverSignature string
+var serverSecret string
 var shellScriptFile string
 
 func init() {
 	listeningAddress = os.Getenv("LISTENING_ADDRESS")
-	serverSignature = os.Getenv("SERVER_SIGNATURE")
+	serverSecret = os.Getenv("SERVER_SECRET")
 	shellScriptFile = os.Getenv("SHELL_SCRIPT_FILE")
 }
 
 func parseFlags() {
 	listeningAddressFlag := flag.String("LISTENING_ADDRESS", "", "Server listening Address")
-	serverSignatureFlag := flag.String("SERVER_SIGNATURE", "", "Server authorizing signature")
+	serverSecretFlag := flag.String("SERVER_SECRET", "", "Server authorizing secret")
 	shellScriptFileFlag := flag.String("SHELL_SCRIPT_FILE", "", "Blog updating shell script file")
 
 	flag.Parse()
@@ -31,8 +35,8 @@ func parseFlags() {
 		listeningAddress = *listeningAddressFlag
 	}
 
-	if *serverSignatureFlag != "" {
-		serverSignature = *serverSignatureFlag
+	if *serverSecretFlag != "" {
+		serverSecret = *serverSecretFlag
 	}
 
 	if *shellScriptFileFlag != "" {
@@ -62,13 +66,35 @@ func mainRouter() *gin.Engine {
 func handlerGithubWebhooks(c *gin.Context) {
 	req := c.Request
 	event := req.Header.Get("X-GitHub-Event")
-	signature := req.Header.Get("X-Hub-Signature")
 
-	if signature != serverSignature {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized",
+	body, err := ioutil.ReadAll(req.Body)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
 		})
 		return
+	}
+
+	// If we have a Secret set, we should check the MAC
+	if serverSecret != "" {
+		signature := req.Header.Get("X-Hub-Signature")
+
+		if signature == "" {
+			c.JSON(http.StatusForbidden, gin.H{
+				"message": "403 Forbidden - Missing X-Hub-Signature required for HMAC verification",
+			})
+			return
+		}
+
+		expectedSig := generateSignature(body)
+
+		if !hmac.Equal([]byte(expectedSig), []byte(signature)) {
+			c.JSON(http.StatusForbidden, gin.H{
+				"message": "403 Forbidden - HMAC verification failed",
+			})
+			return
+		}
 	}
 
 	if event == "ping" {
@@ -81,6 +107,13 @@ func handlerGithubWebhooks(c *gin.Context) {
 			"message": "Done",
 		})
 	}
+}
+
+func generateSignature(palyload []byte) string {
+	mac := hmac.New(sha1.New, []byte(serverSecret))
+	mac.Write(palyload)
+	sum := mac.Sum(nil)
+	return "sha1=" + hex.EncodeToString(sum)
 }
 
 func doUpdate() {
