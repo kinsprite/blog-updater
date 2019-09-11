@@ -20,10 +20,11 @@ func init() {
 func main() {
 	addr := os.Getenv("LISTENING_ADDRESS")
 
-	if addr != "" {
+	if addr == "" {
 		addr = ":8080"
 	}
 
+	log.Println("[INFO] Start server at", addr)
 	mainRouter().Run(addr)
 }
 
@@ -63,8 +64,8 @@ func doUpdate() {
 	out, err := exec.Command(shellScriptFile).Output()
 
 	if err != nil {
-		log.Println("[ERROR]  ", err)
+		log.Println("[ERROR]", err)
 	} else {
-		log.Println("[INFO]  ", out)
+		log.Println("[INFO]", out)
 	}
 }

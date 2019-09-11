@@ -24,5 +24,9 @@ export GIN_MODE=release
 export LISTENING_ADDRESS=127.0.0.1:8080
 export SERVER_SIGNATURE=sha1=xxx-yyy-zzz
 export SHELL_SCRIPT_FILE=/etc/blog-updater/do-update.sh
-./blog-updater
+blog-updater
 ```
+
+
+## Test
+curl -X POST -H "Content-type: application/json" -H "X-GitHub-Event: ping" -H "X-Hub-Signature: sha1=xxx-yyy-zzz" 127.0.0.1:8080/github-webhooks
