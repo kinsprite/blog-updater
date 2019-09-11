@@ -33,11 +33,11 @@ blog-updater
 ping:
 
 ```shell
-curl -X POST -H "Content-type: application/json" -H "X-GitHub-Event: ping" -H "X-Hub-Signature: sha1=xxx-yyy-zzz" 127.0.0.1:8080/github-webhooks
+curl -X POST -H "Content-type: application/json" -H "X-GitHub-Event: ping" -H "X-Hub-Signature: sha1=aaa-bbb-ccc" 127.0.0.1:8080/github-webhooks
 ```
 
 push:
 
 ```shell
-curl -X POST -H "Content-type: application/json" -H "X-GitHub-Event: push" -H "X-Hub-Signature: sha1=xxx-yyy-zzz" 127.0.0.1:8080/github-webhooks
+curl -X POST -H "Content-type: application/json" -H "X-GitHub-Event: push" -H "X-Hub-Signature: sha1=aaa-bbb-ccc" 127.0.0.1:8080/github-webhooks
 ```
