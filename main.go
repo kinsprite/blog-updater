@@ -89,6 +89,6 @@ func doUpdate() {
 	if err != nil {
 		log.Println("[ERROR]", err)
 	} else {
-		log.Println("[INFO]", out)
+		log.Println("[INFO]", string(out))
 	}
 }
