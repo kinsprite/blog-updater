@@ -5,14 +5,16 @@
 on Windows:
 ```cmd
 set GOPROXY=https://goproxy.io
-go build .
+go mod vendor
+go build -mod=vendor -o blog-updater.exe .
 ```
 
 or Linux:
 
 ```shell
 export GOPROXY=https://goproxy.io
-go build .
+go mod vendor
+go build -mod=vendor -o blog-updater .
 ```
 
 ## Running Env
