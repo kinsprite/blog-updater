@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -9,23 +10,45 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var listeningAddress string
 var serverSignature string
 var shellScriptFile string
 
 func init() {
+	listeningAddress = os.Getenv("LISTENING_ADDRESS")
 	serverSignature = os.Getenv("SERVER_SIGNATURE")
 	shellScriptFile = os.Getenv("SHELL_SCRIPT_FILE")
 }
 
-func main() {
-	addr := os.Getenv("LISTENING_ADDRESS")
+func parseFlags() {
+	listeningAddressFlag := flag.String("LISTENING_ADDRESS", "", "Server listening Address")
+	serverSignatureFlag := flag.String("SERVER_SIGNATURE", "", "Server authorizing signature")
+	shellScriptFileFlag := flag.String("SHELL_SCRIPT_FILE", "", "Blog updating shell script file")
 
-	if addr == "" {
-		addr = ":8080"
+	flag.Parse()
+
+	if *listeningAddressFlag != "" {
+		listeningAddress = *listeningAddressFlag
 	}
 
-	log.Println("[INFO] Start server at", addr)
-	mainRouter().Run(addr)
+	if *serverSignatureFlag != "" {
+		serverSignature = *serverSignatureFlag
+	}
+
+	if *shellScriptFileFlag != "" {
+		shellScriptFile = *shellScriptFileFlag
+	}
+}
+
+func main() {
+	parseFlags()
+
+	if listeningAddress == "" {
+		listeningAddress = ":8080"
+	}
+
+	log.Println("[INFO] Start server on", listeningAddress)
+	mainRouter().Run(listeningAddress)
 }
 
 func mainRouter() *gin.Engine {
