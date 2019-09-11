@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,7 +19,7 @@ func Test_mainRouter(t *testing.T) {
 		payload   string
 	}
 
-	signature := "sha1=xxx1112233"
+	signature := "sha1=xxx-yyy-zzz"
 	serverSignature = signature
 
 	tests := []struct {
@@ -49,7 +50,7 @@ func Test_mainRouter(t *testing.T) {
 		client := &http.Client{}
 
 		url := fmt.Sprintf("%s%s", ts.URL, args.uri)
-		req, err := http.NewRequest("POST", url, nil)
+		req, err := http.NewRequest("POST", url, strings.NewReader(args.payload))
 
 		req.Header.Add("X-GitHub-Event", args.event)
 		req.Header.Add("X-Hub-Signature", args.signature)
