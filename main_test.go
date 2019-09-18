@@ -49,9 +49,10 @@ func Test_mainRouter(t *testing.T) {
 
 		url := fmt.Sprintf("%s%s", ts.URL, args.uri)
 		req, err := http.NewRequest("POST", url, strings.NewReader(args.payload))
+		sig := generateSignature([]byte(args.payload))
 
 		req.Header.Add("X-GitHub-Event", args.event)
-		req.Header.Add("X-Hub-Signature", generateSignature([]byte(args.payload)))
+		req.Header.Add("X-Hub-Signature", sig)
 		req.Header.Add("Content-Type", "application/json")
 
 		resp, err := client.Do(req)
