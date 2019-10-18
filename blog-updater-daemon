@@ -12,7 +12,7 @@
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/local/bin/blog-updater
-DAEMON_OPTS="-LISTENING_ADDRESS=127.0.0.1:8080 -SERVER_SECRET=xxx-yyy-zzz -SHELL_SCRIPT_FILE=/etc/blog-updater/do-update.sh"
+DAEMON_OPTS="-LISTENING_ADDRESS=127.0.0.1:8080 -SERVER_SECRET=xxx-yyy-zzz -INIT_SCRIPT_FILE=/etc/blog-updater/do-init.sh -UPDATE_SCRIPT_FILE=/etc/blog-updater/do-update.sh"
 #CFG_DIR=/etc/blog-updater
 NAME=blog-updater
 DESC=blog-updater

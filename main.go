@@ -16,18 +16,21 @@ import (
 
 var listeningAddress string
 var serverSecret string
-var shellScriptFile string
+var initScriptFile string
+var updateScriptFile string
 
 func init() {
 	listeningAddress = os.Getenv("LISTENING_ADDRESS")
 	serverSecret = os.Getenv("SERVER_SECRET")
-	shellScriptFile = os.Getenv("SHELL_SCRIPT_FILE")
+	initScriptFile = os.Getenv("INIT_SCRIPT_FILE")
+	updateScriptFile = os.Getenv("UPDATE_SCRIPT_FILE")
 }
 
 func parseFlags() {
 	listeningAddressFlag := flag.String("LISTENING_ADDRESS", "", "Server listening Address")
 	serverSecretFlag := flag.String("SERVER_SECRET", "", "Server authorizing secret")
-	shellScriptFileFlag := flag.String("SHELL_SCRIPT_FILE", "", "Blog updating shell script file")
+	initScriptFileFlag := flag.String("INIT_SCRIPT_FILE", "", "Blog init script file on startup")
+	updateScriptFileFlag := flag.String("UPDATE_SCRIPT_FILE", "", "Blog updating script file")
 
 	flag.Parse()
 
@@ -39,13 +42,18 @@ func parseFlags() {
 		serverSecret = *serverSecretFlag
 	}
 
-	if *shellScriptFileFlag != "" {
-		shellScriptFile = *shellScriptFileFlag
+	if *initScriptFileFlag != "" {
+		initScriptFile = *initScriptFileFlag
+	}
+
+	if *updateScriptFileFlag != "" {
+		updateScriptFile = *updateScriptFileFlag
 	}
 }
 
 func main() {
 	parseFlags()
+	doInit()
 
 	if listeningAddress == "" {
 		listeningAddress = ":8080"
@@ -116,8 +124,16 @@ func generateSignature(palyload []byte) string {
 	return "sha1=" + hex.EncodeToString(sum)
 }
 
+func doInit() {
+	runScript(initScriptFile)
+}
+
 func doUpdate() {
-	out, err := exec.Command(shellScriptFile).Output()
+	runScript(updateScriptFile)
+}
+
+func runScript(file string) {
+	out, err := exec.Command(file).Output()
 
 	if err != nil {
 		log.Println("[ERROR]", err)

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Webhook from GitHub
+# System startup
 
 baseURL=https://your-example.com/
 logfile=/var/log/blog-updater.log
@@ -11,9 +11,7 @@ destDir=/var/cache/nginx/blog/$curDirName
 
 echo ---- $(date) ---- >> $logfile
 
-git pull >> $logfile \
- && git submodule update >> $logfile \
- && hugo --cleanDestinationDir --baseURL $baseURL --destination $destDir >> $logfile
+hugo --cleanDestinationDir --baseURL $baseURL --destination $destDir >> $logfile
 
 if [ $? -eq 0 ]; then
     # Soft link on SSD driver only
