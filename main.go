@@ -19,6 +19,8 @@ var serverSecret string
 var initScriptFile string
 var updateScriptFile string
 
+var chanUpdate = make(chan int, 2)
+
 func init() {
 	listeningAddress = os.Getenv("LISTENING_ADDRESS")
 	serverSecret = os.Getenv("SERVER_SECRET")
@@ -54,6 +56,7 @@ func parseFlags() {
 func main() {
 	parseFlags()
 	doInit()
+	startUpdateRoutine()
 
 	if listeningAddress == "" {
 		listeningAddress = ":8080"
@@ -110,9 +113,14 @@ func handlerGithubWebhooks(c *gin.Context) {
 			"message": "Pong",
 		})
 	} else if event == "push" {
-		doUpdate()
+		done := "Queue full"
+
+		if notifyUpdate() {
+			done = "Done"
+		}
+
 		c.JSON(http.StatusOK, gin.H{
-			"message": "Done",
+			"message": done,
 		})
 	}
 }
@@ -140,4 +148,27 @@ func runScript(file string) {
 	} else {
 		log.Println("[INFO]", string(out))
 	}
+}
+
+func startUpdateRoutine() {
+	go func() {
+		for {
+			_, ok := <-chanUpdate
+
+			if !ok {
+				break
+			}
+
+			doUpdate()
+		}
+	}()
+}
+
+func notifyUpdate() bool {
+	if len(chanUpdate) < 2 {
+		chanUpdate <- 1
+		return true
+	}
+
+	return false
 }
